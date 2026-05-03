@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f3f0;
+            color: #3a3a3a;
+            line-height: 1.6;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(245, 243, 240, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            z-index: 100;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.3px;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 6px;
+        }
+
+        nav .nav-links button {
+            background: none;
+            border: 1.5px solid transparent;
+            color: #999;
+            padding: 7px 18px;
+            border-radius: 100px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        nav .nav-links button:hover { color: #555; }
+
+        nav .nav-links button.active {
+            color: #1a1a1a;
+            border-color: #1a1a1a;
+            background: #fff;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 100px 24px 80px;
+        }
+
+        .category { margin-bottom: 72px; }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 36px;
+            padding-bottom: 14px;
+            border-bottom: 1.5px solid rgba(0,0,0,0.06);
+        }
+
+        .category-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            color: #aaa;
+            font-weight: 600;
+        }
+
+        .category-count {
+            font-size: 11px;
+            color: #bbb;
+            background: #fff;
+            padding: 3px 10px;
+            border-radius: 100px;
+            border: 1px solid rgba(0,0,0,0.06);
+            font-weight: 500;
+        }
+
+        .project {
+            margin-bottom: 52px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
+        }
+
+        .project.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .project .slider-wrapper {
+            flex: 0 0 58%;
+            min-width: 0;
+        }
+
+        .project .project-info {
+            flex: 1;
+            min-width: 0;
+            padding-top: 4px;
+        }
+
+        .slider-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #eae8e4;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+        }
+
+        .slider-track {
+            display: flex;
+            transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .slider-slide {
+            min-width: 100%;
+            aspect-ratio: 16 / 9;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .slider-slide img,
+        .slider-slide video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .slider-slide:hover img,
+        .slider-slide:hover video {
+            transform: scale(1.03);
+        }
+
+        /* ===== VIDEO SLIDE ===== */
+        .slider-slide.video-slide {
+            cursor: pointer;
+        }
+
+        .slider-slide video {
+            object-position: center;
+        }
+
+        /* Video play button overlay */
+        .video-play-btn {
+            position: absolute;
+            inset: 0;
+            z-index: 6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-play-btn .play-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .slider-slide:hover .video-play-btn .play-circle {
+            transform: scale(1.1);
+            box-shadow: 0 6px 28px rgba(0,0,0,0.2);
+        }
+
+        .video-play-btn .play-circle svg {
+            width: 22px;
+            height: 22px;
+            color: #1a1a1a;
+            margin-left: 3px;
+        }
+
+        /* Hide play button when video is playing */
+        .slider-slide.playing .video-play-btn {
+            opacity: 0;
+        }
+
+        .slider-slide.playing .click-hint {
+            opacity: 0;
+        }
+
+        /* Video type badge */
+        .slide-type-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 8;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(6px);
+            padding: 4px 10px;
+            border-radius: 100px;
+            pointer-events: none;
+        }
+
+        .slide-type-badge svg {
+            width: 12px;
+            height: 12px;
+            color: #fff;
+        }
+
+        .slide-type-badge span {
+            font-size: 10px;
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== CLICK HINT OVERLAY ===== */
+        .click-hint {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.28);
+            transition: all 0.35s ease;
+            pointer-events: none;
+        }
+
+        .click-hint .hint-badge {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 9px 18px;
+            border-radius: 100px;
+            transition: all 0.35s ease;
+        }
+
+        .click-hint .hint-badge svg {
+            width: 15px;
+            height: 15px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .click-hint .hint-badge span {
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .slider-slide:hover .click-hint {
+            background: rgba(0, 0, 0, 0.48);
+        }
+
+        .slider-slide:hover .click-hint .hint-badge {
+            background: rgba(255, 255, 255, 0.28);
+            border-color: rgba(255, 255, 255, 0.55);
+            transform: scale(1.05);
+        }
+
+        /* For video slides: lighter overlay so play btn is clear */
+        .slider-slide.video-slide .click-hint {
+            background: rgba(0, 0, 0, 0.18);
+        }
+
+        .slider-slide.video-slide:hover .click-hint {
+            background: rgba(0, 0, 0, 0.35);
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(0,0,0,0.06);
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.25s ease;
+            opacity: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .slider-wrapper:hover .slider-btn { opacity: 1; }
+
+        .slider-btn:hover {
+            background: #fff;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .slider-btn.prev { left: 10px; }
+        .slider-btn.next { right: 10px; }
+        .slider-btn:disabled { opacity: 0 !important; cursor: default; }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+        }
+
+        .slider-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.45);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+
+        .slider-dot.active {
+            background: #fff;
+            transform: scale(1.2);
+            box-shadow: 0 0 6px rgba(0,0,0,0.15);
+        }
+
+        .slider-counter {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(6px);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 100px;
+            z-index: 10;
+            letter-spacing: 0.5px;
+        }
+
+        .project-info { padding: 0 2px; }
+
+        .project-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+        }
+
+        .project-desc {
+            font-size: 13.5px;
+            color: #888;
+            margin-bottom: 16px;
+            line-height: 1.75;
+        }
+
+        .project-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .tag {
+            font-size: 11px;
+            padding: 4px 12px;
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.07);
+            border-radius: 100px;
+            color: #888;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+
+        .project-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 18px;
+            font-size: 13px;
+            color: #1a1a1a;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            padding-bottom: 2px;
+            border-bottom: 1.5px solid transparent;
+        }
+
+        .project-link:hover { border-bottom-color: #1a1a1a; }
+        .project-link svg { width: 14px; height: 14px; }
+
+        /* ===== GITHUB LINK STYLE ===== */
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 18px;
+            font-size: 13px;
+            color: #1a1a1a;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 8px 18px;
+            border-radius: 100px;
+            border: 1.5px solid rgba(0,0,0,0.12);
+            background: #fff;
+        }
+
+        .github-link:hover {
+            background: #1a1a1a;
+            color: #fff;
+            border-color: #1a1a1a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
+
+        .github-link:hover svg {
+            fill: #fff;
+        }
+
+        .github-link svg {
+            width: 16px;
+            height: 16px;
+            fill: #1a1a1a;
+            transition: fill 0.3s ease;
+        }
+
+        .project-divider {
+            border: none;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            margin-bottom: 52px;
+        }
+
+        /* ===== LIGHTBOX ===== */
+        .lightbox-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+
+        .lightbox-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .lightbox-bg {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .lightbox-scroll-container {
+            position: fixed;
+            inset: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            padding: 60px 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .lightbox-scroll-container::-webkit-scrollbar { width: 6px; }
+        .lightbox-scroll-container::-webkit-scrollbar-track { background: transparent; }
+        .lightbox-scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+
+        .lightbox-content-wrapper {
+            width: 100%;
+            max-width: 900px;
+            transform: translateY(30px) scale(0.97);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .lightbox-overlay.open .lightbox-content-wrapper {
+            transform: translateY(0) scale(1);
+        }
+
+        .lightbox-content-wrapper img,
+        .lightbox-content-wrapper video {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            display: block;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+        }
+
+        .lightbox-content-wrapper video {
+            max-height: 80vh;
+            object-fit: contain;
+            background: #000;
+        }
+
+        .lightbox-close-btn {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            z-index: 310;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .lightbox-overlay.open .lightbox-close-btn {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .lightbox-close-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.08);
+        }
+
+        .lightbox-scroll-hint {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 310;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease 0.5s;
+        }
+
+        .lightbox-overlay.open .lightbox-scroll-hint { opacity: 1; }
+        .lightbox-scroll-hint.hidden { opacity: 0 !important; transition: opacity 0.3s ease; }
+
+        .lightbox-scroll-hint span {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .scroll-arrow {
+            width: 20px;
+            height: 20px;
+            border-right: 2px solid rgba(255,255,255,0.4);
+            border-bottom: 2px solid rgba(255,255,255,0.4);
+            transform: rotate(45deg);
+            animation: bounceDown 1.5s infinite;
+        }
+
+        @keyframes bounceDown {
+            0%, 100% { transform: rotate(45deg) translateY(0); }
+            50% { transform: rotate(45deg) translateY(5px); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        footer a {
+            color: #999;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        footer a:hover { color: #1a1a1a; }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 12px 16px;
+                flex-direction: column;
+                gap: 10px;
+            }
+            nav .nav-links { flex-wrap: wrap; justify-content: center; }
+            nav .nav-links button { padding: 6px 14px; font-size: 12px; }
+            main { padding: 125px 16px 60px; }
+            .project { flex-direction: column; gap: 18px; }
+            .project .slider-wrapper { flex: none; width: 100%; }
+            .project-title { font-size: 18px; }
+            .slider-btn { width: 30px; height: 30px; font-size: 13px; opacity: 1; }
+            .click-hint .hint-badge span { font-size: 10px; }
+            .click-hint .hint-badge { padding: 7px 14px; }
+            .video-play-btn .play-circle { width: 46px; height: 46px; }
+            .video-play-btn .play-circle svg { width: 18px; height: 18px; }
+            .lightbox-scroll-container { padding: 50px 10px; }
+            .lightbox-content-wrapper { max-width: 100%; }
+            .lightbox-content-wrapper img { border-radius: 8px; }
+            .lightbox-content-wrapper video { border-radius: 8px; }
+            .github-link { font-size: 12px; padding: 7px 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">Projects</div>
+        <div class="nav-links">
+            <button class="active" onclick="filterCategory('all', this)">All</button>
+            <button onclick="filterCategory('web', this)">Web</button>
+            <button onclick="filterCategory('android', this)">Android</button>
+            <button onclick="filterCategory('game', this)">Game</button>
+            <button onclick="filterCategory('uiux', this)">UI/UX</button>
+            <button onclick="filterCategory('3d', this)">3D Design</button>
+            
+        </div>
+    </nav>
+
+    <!-- LIGHTBOX -->
+    <div class="lightbox-overlay" id="lightbox">
+        <div class="lightbox-bg" onclick="closeLightbox()"></div>
+        <button class="lightbox-close-btn" onclick="closeLightbox()">✕</button>
+        <div class="lightbox-scroll-container" id="lightbox-scroll">
+            <div class="lightbox-content-wrapper" id="lightbox-content">
+                <!-- img or video will be injected here -->
+            </div>
+        </div>
+        <div class="lightbox-scroll-hint" id="scroll-hint">
+            <span>Scroll to see full</span>
+            <div class="scroll-arrow"></div>
+        </div>
+    </div>
+
+    <main id="projects-container">
+
+        <!-- ======== WEB ======== -->
+        <section class="category" data-category="web">
+            <div class="category-header">
+                <span class="category-label">Web Development</span>
+                <span class="category-count">3 projects</span>
+            </div>
+
+            <!-- Web 1: Baby Care — image + video -->
+            <div class="project">
+                <div class="slider-wrapper">
+                    <div class="slider-counter">1 / 1</div>
+                    <button class="slider-btn prev" disabled>‹</button>
+                    <button class="slider-btn next">›</button>
+                    <div class="slider-track">
+                        <!-- IMAGE SLIDE -->
+                        <div class="slider-slide" data-type="image" onclick="openLightbox(this)">
+                            <img src="image/web/web1a.png" alt="Baby Care">
+                            <div class="click-hint">
+                                <div class="hint-badge">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                                    <span>Click to view full</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- VIDEO SLIDE -->
+                        
+                    </div>
+                    <div class="slider-dots">
+                        <button class="slider-dot active"></button>
+                        <button class="slider-dot"></button>
+                    </div>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">Baby Care</h3>
+                    <p class="project-desc">
+                        Baby Care Website merupakan aplikasi berbasis web yang dirancang untuk memantau pertumbuhan bayi dan mendeteksi risiko stunting, di mana pengguna dapat menginput data seperti usia, tinggi badan, dan berat badan bayi, kemudian sistem akan menganalisis data tersebut berdasarkan standar pertumbuhan untuk menentukan apakah bayi berada dalam kondisi normal atau berisiko stunting, serta menampilkan hasil dalam bentuk informasi yang jelas.
+                    </p>
+                    <div class="project-meta">
+                        <span class="tag">Laravel</span>
+                        <span class="tag">Express.js</span>
+                        <span class="tag">Bootstrap</span>
+                    </div>
+                    <a href="https://krp186zl.github.io/Baby-Care/" class="github-link" target="_blank">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                        View on GitHub
+                    </a>
+                </div>
+            </div>
+
+            <hr class="project-divider">
+
+            <!-- Web 2 -->
+            <div class="project">
+                <div class="slider-wrapper">
+                    <div class="slider-counter">1 / 2</div>
+                    <button class="slider-btn prev" disabled>‹</button>
+                    <button class="slider-btn next">›</button>
+                    <div class="slider-track">
+                        <div class="slider-slide" data-type="image" onclick="openLightbox(this)">
+                            <img src="image/web/web2.png">
+                            <div class="click-hint"><div class="hint-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Click to view full</span></div></div>
+                        </div>
+                        <div class="slider-slide" data-type="image" onclick="openLightbox(this)">
+                            <img src="image/web/web3a.png">
+                            <div class="click-hint"><div class="hint-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Click to view full</span></div></div>
+                        </div>
+                        <div class="slider-slide" data-type="image" onclick="openLightbox(this)">
+                            <img src="image/web/image.png">
+                            <div class="click-hint"><div class="hint-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Click to view full</span></div></div>
+                        </div>
+                    </div>
+                    <div class="slider-dots">
+                        <button class="slider-dot active"></button>
+                        <button class="slider-dot"></button>
+                    </div>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">Sistem Jadwal Generate Otomasi</h3>
+                    <p class="project-desc">
+                        Sistem Penjadwalan Generate Otomatis menggunakan Algoritma Genetika merupakan aplikasi untuk menghasilkan jadwal optimal dengan mempertimbangkan constraint seperti waktu, pengajar, mata pelajaran, dan ruang. Sistem ini memanfaatkan proses seleksi, crossover, dan mutasi untuk meminimalkan konflik dan meningkatkan efisiensi. Dibangun dengan Laravel sebagai backend dan Python Flask sebagai API komputasi, aplikasi ini mampu menghasilkan jadwal yang lebih akurat, terstruktur, dan adaptif dibandingkan metode manual.
+                    </p>
+                    <div class="project-meta">
+                        <span class="tag">Laravel</span>
+                        <span class="tag">Flask</span>
+                    </div>
+                    <a href="https://github.com/Afifrrahman/Automatically-generate-schedule" class="github-link" target="_blank">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                        View on GitHub
+                    </a>
+                </div>
+            </div>
+
+            <hr class="project-divider">
+
+            <!-- Web 3 -->
+            <div class="project">
+                <div class="slider-wrapper">
+                    <div class="slider-counter">1 / 3</div>
+                    <button class="slider-btn prev" disabled>‹</button>
+                    <button class="slider-btn next">›</button>
+                    <div class="slider-track">
+                        <div class="slider-slide" data-type="image" onclick="openLightbox(this)">
+                            <img src="image/web/web4-4.png">
+                            <div class="click-hint"><div class="hint-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Click to view full</span></div></div>
+                        </div>
+                        
+                    </div>
+                    <div class="slider-dots">
+                        <button class="slider-dot active"></button>
+                        <button class="slider-dot"></button>
+                        <button class="slider-dot"></button>
+                    </div>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">Lms Inovindo Academy</h3>
+                    <p class="project-desc">
+                        LMS Inovindo merupakan platform pembelajaran yang terintegrasi dengan sistem utama melalui mekanisme Single Sign-On (SSO) berbasis JSON Web Token (JWT), di mana pengguna cukup melakukan satu kali login pada website utama Inovindo untuk kemudian dapat mengakses LMS tanpa perlu autentikasi ulang. Sistem ini memanfaatkan JWT sebagai token keamanan untuk mengelola sesi pengguna secara aman dan efisien, sehingga proses akses menjadi lebih seamless, meningkatkan pengalaman pengguna, serta memastikan integrasi yang konsisten antar sistem.
+                    </p>
+                    <div class="project-meta">
+                        <span class="tag">Laravel</span>
+                        <span class="tag">JWT</span>
+                        <span class="tag">Boostrap</span>
+                    </div>
+                    <!-- <a href="https://github.com/Afifrrahman/lms-inovindo" class="github-link" target="_blank">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                        View on GitHub
+                    </a> -->
+                </div>
+            </div>
+        </section>
+
+         <section class="category" data-category="game">
+            <div class="category-header">
+                <span class="category-label">Game Development</span>
+                <span class="category-count">1 projects</span>
+            </div>
+
+            <!-- Game 1 -->
+            <div class="project">
+                <div class="slider-wrapper">
+                    <div class="slider-counter">1 / 1</div>
+                    <button class="slider-btn prev" disabled>‹</button>
+                    <button class="slider-btn next">›</button>
+                    <div class="slider-track">
+                        <!-- Slide gambar thumbnail game -->
+                        <div class="slider-slide" data-type="image" onclick="openLightbox(this)">
+                            <img src="android/gamesssss.png" alt="Game 1 Screenshot">
+                            <div class="click-hint">
+                                <div class="hint-badge">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                                    <span>Click to view full</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Slide video gameplay -->
+                        <div class="slider-slide video-slide" data-type="video" onclick="handleVideoSlideClick(this)">
+                            <video src="android/sssss.mp4" muted preload="metadata"></video>
+                            <div class="slide-type-badge">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                <span>Video</span>
+                            </div>
+                            <div class="video-play-btn">
+                                <div class="play-circle">
+                                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                </div>
+                            </div>
+                            <div class="click-hint">
+                                <div class="hint-badge">
+                                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                    <span>Click to play</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slider-dots">
+                        <button class="slider-dot active"></button>
+                        <button class="slider-dot"></button>
+                    </div>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">2D Pixel Games</h3>
+                    <p class="project-desc">
+                        Lubby adalah game 2D platformer bergaya pixel art yang dikembangkan menggunakan Flutter dan Flame Engine. Game ini mengajak pemain untuk berpetualang melewati berbagai rintangan, melawan musuh seperti slime dan burung, serta mengumpulkan reward di sepanjang level. Dengan fokus pada mekanik pergerakan yang responsif dan sistem musuh yang bervariasi.
+                    </p>
+                    <div class="project-meta">
+                        <span class="tag">Flutter</span>
+                        <span class="tag">Flame</span>
+                        <span class="tag">2D</span>
+                    </div>
+                    <a href="https://github.com/Afifrrahman/Lubby_PixelGames" class="github-link" target="_blank">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                        View on GitHub
+                    </a>
+                </div>
+            </div>
+
+            <!-- <hr class="project-divider"> -->
+
+        </section>
+
+        <!-- ======== ANDROID ======== -->
+        <section class="category" data-category="android">
+            <div class="category-header">
+                <span class="category-label">Android Development</span>
+                <span class="category-count">1 projects</span>
+            </div>
+
+            <div class="project">
+                <div class="slider-wrapper">
+                    <div class="slider-counter">1 / 3</div>
+                    <button class="slider-btn prev" disabled>‹</button>
+                    <button class="slider-btn next">›</button>
+                    <div class="slider-track">
+                        <div class="slider-slide" data-type="image" onclick="openLightbox(this)">
+                            <img src="android/and2.png">
+                            <div class="click-hint"><div class="hint-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Click to view full</span></div></div>
+                        </div>
+                    </div>
+                    <div class="slider-dots">
+                        <button class="slider-dot active"></button>
+                        <button class="slider-dot"></button>
+                        <button class="slider-dot"></button>
+                    </div>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">Sleep Tracking Mobil App</h3>
+                    <p class="project-desc">
+                        Aplikasi Sleep Tracking merupakan aplikasi yang dirancang untuk memantau dan menganalisis pola tidur pengguna dengan mengumpulkan data seperti durasi tidur, waktu tidur dan bangun, serta kualitas istirahat. Sistem ini mengolah data tersebut untuk memberikan insight mengenai kebiasaan tidur pengguna, dilengkapi dengan visualisasi statistik dan rekomendasi yang dipersonalisasi guna membantu meningkatkan kualitas tidur dan menjaga kesehatan secara keseluruhan.
+                    </p>
+                    <div class="project-meta">
+                        <span class="tag">Flutter</span>
+                        <span class="tag">Hive</span>
+                    </div>
+                    <a href="https://github.com/Afifrrahman/Sleep_tracker" class="github-link" target="_blank">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                        View on GitHub
+                    </a>
+                </div>
+            </div>
+
+            <!-- <hr class="project-divider"> -->
+
+        </section>
+
+        <!-- ======== UI/UX ======== -->
+        <section class="category" data-category="uiux">
+            <div class="category-header">
+                <span class="category-label">UI/UX Design</span>
+                <span class="category-count">2 projects</span>
+            </div>
+
+            <div class="project">
+                <div class="slider-wrapper">
+                    <div class="slider-counter">1 / 1</div>
+                    <button class="slider-btn prev" disabled>‹</button>
+                    <button class="slider-btn next">›</button>
+                    <div class="slider-track">
+                        <div class="slider-slide" data-type="image" onclick="openLightbox(this)">
+                            <img src="image/ui/ui1.png" alt="Banking App Redesign">
+                            <div class="click-hint"><div class="hint-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Click to view full</span></div></div>
+                        </div>
+                    </div>
+                    <div class="slider-dots"><button class="slider-dot active"></button></div>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">UI/UX Web</h3>
+                    <p class="project-desc">
+                         UI design landing page website menggunakan figma
+                    </p>
+                    <div class="project-meta">
+                        <span class="tag">Figma</span>
+                        <span class="tag">Design System</span>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="project-divider">
+
+            <div class="project">
+                <div class="slider-wrapper">
+                    <div class="slider-counter">1 / 1</div>
+                    <button class="slider-btn prev" disabled>‹</button>
+                    <button class="slider-btn next">›</button>
+                    <div class="slider-track">
+                        <div class="slider-slide" data-type="image" onclick="openLightbox(this)">
+                            <img src="image/ui/ui21.png" alt="Health App">
+                            <div class="click-hint"><div class="hint-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Click to view full</span></div></div>
+                        </div>
+                        <div class="slider-slide" data-type="image" onclick="openLightbox(this)">
+                            <img src="image/ui/ui3.png" alt="Health App">
+                            <div class="click-hint"><div class="hint-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Click to view full</span></div></div>
+                        </div>
+                    </div>
+                    <div class="slider-dots"><button class="slider-dot active"></button></div>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">UI/UX Foodfind</h3>
+                    <p class="project-desc">
+                        UI design Aplikasi android menggunakan figma
+                    </p>
+                    <div class="project-meta">
+                        <span class="tag">Figma</span>
+                        <span class="tag">Wireframing</span>
+                        <span class="tag">Usability Testing</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== 3D ======== -->
+        <section class="category" data-category="3d">
+            <div class="category-header">
+                <span class="category-label">3D Design</span>
+                <span class="category-count">2 projects</span>
+            </div>
+
+            <div class="project">
+                <div class="slider-wrapper">
+                    <div class="slider-counter">1 / 3</div>
+                    <button class="slider-btn prev" disabled>‹</button>
+                    <button class="slider-btn next">›</button>
+                    <div class="slider-track">
+                        <div class="slider-slide" data-type="image" onclick="openLightbox(this)">
+                            <img src="image/3d/3d1.png" alt="Product Angle 1">
+                            <div class="click-hint"><div class="hint-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Click to view full</span></div></div>
+                        </div>
+                       
+                        <div class="slider-slide video-slide" data-type="video" onclick="handleVideoSlideClick(this)">
+                            <video src="image/3d/kopi.mp4" muted preload="metadata"></video>
+                            <div class="slide-type-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span>Video</span></div>
+                            <div class="video-play-btn"><div class="play-circle"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div></div>
+                            <div class="click-hint"><div class="hint-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span>Click to play</span></div></div>
+                        </div>
+                    </div>
+                    <div class="slider-dots">
+                        <button class="slider-dot active"></button>
+                        <button class="slider-dot"></button>
+                        <button class="slider-dot"></button>
+                    </div>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">3d Modeling Produk</h3>
+                    <p class="project-desc">
+                        3D product rendering 
+                    </p>
+                    <div class="project-meta">
+                        <span class="tag">Blender</span>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="project-divider">
+
+            <div class="project">
+                <div class="slider-wrapper">
+                    <div class="slider-counter">1 / 4</div>
+                    <button class="slider-btn prev" disabled>‹</button>
+                    <button class="slider-btn next">›</button>
+                    <div class="slider-track">
+                        <div class="slider-slide" data-type="image" onclick="openLightbox(this)">
+                            <img src="image/3d/lp.png">
+                            <div class="click-hint"><div class="hint-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Click to view full</span></div></div>
+                        </div>
+                    </div>
+                    <div class="slider-dots">
+                        <button class="slider-dot active"></button>
+                        <button class="slider-dot"></button>
+                        <button class="slider-dot"></button>
+                        <button class="slider-dot"></button>
+                    </div>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">3d Modeling Laptop</h3>
+                    <p class="project-desc">
+                         3D product rendering 
+                    </p>
+                    <div class="project-meta">
+                        <span class="tag">Blender</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== GAME ======== -->
+       
+
+    </main>
+
+    <footer>
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=afifrahmaan0808@gmail.com">
+            afifrahmaan0808@gmail.com
+        </a>
+        &nbsp;&middot;&nbsp;
+        <a href="https://github.com/Afifrrahman">GitHub</a>
+        &nbsp;&middot;&nbsp;
+        <a href="https://www.linkedin.com/in/afif-rahman-a19439250/">LinkedIn</a>
+    </footer>
+
+    <script>
+        // ===== SLIDER =====
+        function initSliders() {
+            document.querySelectorAll('.slider-wrapper').forEach(wrapper => {
+                const track = wrapper.querySelector('.slider-track');
+                const slides = wrapper.querySelectorAll('.slider-slide');
+                const dots = wrapper.querySelectorAll('.slider-dot');
+                const prevBtn = wrapper.querySelector('.slider-btn.prev');
+                const nextBtn = wrapper.querySelector('.slider-btn.next');
+                const counter = wrapper.querySelector('.slider-counter');
+                let current = 0;
+                const total = slides.length;
+
+                function goTo(index) {
+                    if (index < 0 || index >= total) return;
+
+                    // Pause all videos when sliding away
+                    slides.forEach(slide => {
+                        const video = slide.querySelector('video');
+                        if (video) {
+                            video.pause();
+                            slide.classList.remove('playing');
+                        }
+                    });
+
+                    current = index;
+                    track.style.transform = `translateX(-${current * 100}%)`;
+                    dots.forEach((dot, i) => dot.classList.toggle('active', i === current));
+                    prevBtn.disabled = current === 0;
+                    nextBtn.disabled = current === total - 1;
+                    counter.textContent = `${current + 1} / ${total}`;
+                }
+
+                prevBtn.addEventListener('click', (e) => { e.stopPropagation(); goTo(current - 1); });
+                nextBtn.addEventListener('click', (e) => { e.stopPropagation(); goTo(current + 1); });
+                dots.forEach((dot, i) => {
+                    dot.addEventListener('click', (e) => { e.stopPropagation(); goTo(i); });
+                });
+
+                let startX = 0, isDragging = false;
+                track.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; isDragging = true; }, { passive: true });
+                track.addEventListener('touchend', (e) => {
+                    if (!isDragging) return;
+                    const diff = startX - e.changedTouches[0].clientX;
+                    if (Math.abs(diff) > 50) { diff > 0 ? goTo(current + 1) : goTo(current - 1); }
+                    isDragging = false;
+                }, { passive: true });
+
+                if (total <= 1) {
+                    prevBtn.style.display = 'none';
+                    nextBtn.style.display = 'none';
+                    wrapper.querySelector('.slider-dots').style.display = 'none';
+                    counter.style.display = 'none';
+                }
+                goTo(0);
+            });
+        }
+
+        // ===== VIDEO SLIDE CLICK =====
+        function handleVideoSlideClick(slideEl) {
+            const video = slideEl.querySelector('video');
+            if (!video) return;
+
+            if (video.paused) {
+                // Play inline in slider
+                video.muted = false;
+                video.play();
+                slideEl.classList.add('playing');
+            } else {
+                // Open in lightbox for full view
+                openLightboxVideo(video.src);
+            }
+        }
+
+        // ===== FILTER =====
+        function filterCategory(cat, btn) {
+            // Pause all videos
+            document.querySelectorAll('video').forEach(v => { v.pause(); });
+            document.querySelectorAll('.slider-slide.playing').forEach(s => s.classList.remove('playing'));
+
+            document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.category').forEach(section => {
+                if (cat === 'all' || section.dataset.category === cat) {
+                    section.style.display = 'block';
+                    section.querySelectorAll('.project').forEach(p => p.classList.remove('visible'));
+                    setTimeout(() => observeProjects(), 50);
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ===== SCROLL ANIMATION =====
+        function observeProjects() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+            document.querySelectorAll('.project:not(.visible)').forEach(p => observer.observe(p));
+        }
+
+        // ===== LIGHTBOX — IMAGE =====
+        function openLightbox(slideEl) {
+            const type = slideEl.dataset.type;
+
+            if (type === 'video') {
+                const videoSrc = slideEl.querySelector('video').src;
+                openLightboxVideo(videoSrc);
+                return;
+            }
+
+            const imgSrc = slideEl.querySelector('img').src;
+            const lightbox = document.getElementById('lightbox');
+            const content = document.getElementById('lightbox-content');
+            const scrollContainer = document.getElementById('lightbox-scroll');
+            const scrollHint = document.getElementById('scroll-hint');
+
+            content.innerHTML = `<img src="${imgSrc}" alt="Full Preview">`;
+            lightbox.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            scrollContainer.scrollTop = 0;
+            scrollHint.classList.remove('hidden');
+
+            const img = content.querySelector('img');
+            img.onload = function () {
+                if (img.offsetHeight <= scrollContainer.clientHeight) {
+                    scrollHint.classList.add('hidden');
+                }
+            };
+
+            const onScroll = () => {
+                if (scrollContainer.scrollTop > 30) {
+                    scrollHint.classList.add('hidden');
+                    scrollContainer.removeEventListener('scroll', onScroll);
+                }
+            };
+            scrollContainer.addEventListener('scroll', onScroll);
+        }
+
+        // ===== LIGHTBOX — VIDEO =====
+        function openLightboxVideo(videoSrc) {
+            const lightbox = document.getElementById('lightbox');
+            const content = document.getElementById('lightbox-content');
+            const scrollHint = document.getElementById('scroll-hint');
+
+            content.innerHTML = `<video src="${videoSrc}" controls autoplay style="width:100%;border-radius:12px;box-shadow:0 25px 80px rgba(0,0,0,0.4);max-height:80vh;object-fit:contain;background:#000;"></video>`;
+            lightbox.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            scrollHint.classList.add('hidden');
+        }
+
+        // ===== CLOSE LIGHTBOX =====
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            const content = document.getElementById('lightbox-content');
+
+            // Pause video if playing in lightbox
+            const video = content.querySelector('video');
+            if (video) video.pause();
+
+            lightbox.classList.remove('open');
+            document.body.style.overflow = '';
+
+            // Clean up after animation
+            setTimeout(() => { content.innerHTML = ''; }, 350);
+        }
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initSliders();
+            observeProjects();
+        });
+    </script>
+</body>
+</html>
